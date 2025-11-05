@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Dice Spot | Login</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" type="image/png" href="img/icon.png" />
+  <script defer src="navbar.js"></script>
+  <script defer src="login.js"></script>
+</head>
+
+<body>
+  <nav>
+    <h1>🎲 Dice Spot</h1>
+    <div id="nav-links">
+      <a href="cart.html" id="cart-link">🛒 Cart (0)</a>
+      <a href="login.html" class="active">Login</a>
+    </div>
+  </nav>
+
+  <section id="login-section">
+    <div class="login-card">
+      <h2>Welcome Back, Adventurer ⚔️</h2>
+      <p>Sign in to access your quests and your cart.</p>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="you@example.com" required>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="••••••••" required>
+        </div>
+
+        <button type="submit" id="login-btn">Login</button>
+      </form>
+
+      <p class="signup-text">Don’t have an account? <a href="#">Register here</a></p>
+    </div>
+  </section>
+
+  <footer>
+    <p class="footer-bottom">© 2025 Dice Spot — Built by adventurers, for adventurers ⚔️</p>
+  </footer>
+</body>
+</html>
