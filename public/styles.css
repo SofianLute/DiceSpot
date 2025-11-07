@@ -340,3 +340,97 @@ footer a:hover { color: var(--gold); }
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* ==============================
+   🔍 FILTER & SEARCH BAR
+   ============================== */
+
+.filter-section {
+  margin: 3rem auto 2rem;
+  text-align: center;
+  padding: 1.5rem;
+  background: var(--white);
+  border-radius: 15px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  max-width: 950px;
+  animation: fadeInUp 0.8s ease forwards;
+}
+
+.filter-section h3 {
+  color: var(--violet);
+  margin-bottom: 1.2rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.filter-bar input[type="text"],
+.filter-bar select,
+.filter-bar input[type="number"] {
+  padding: 0.7rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 1rem;
+  color: var(--dark);
+  transition: all 0.3s ease;
+  min-width: 180px;
+}
+
+.filter-bar input:focus,
+.filter-bar select:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(255, 179, 71, 0.4);
+  outline: none;
+}
+
+.filter-bar button {
+  background: var(--violet);
+  color: var(--white);
+  border: none;
+  border-radius: 10px;
+  padding: 0.7rem 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.filter-bar button:hover {
+  background: var(--gold);
+  color: var(--dark);
+  transform: scale(1.05);
+}
+
+/* Small info message under filters */
+.filter-info {
+  margin-top: 1rem;
+  color: #666;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .filter-bar {
+    flex-direction: column;
+  }
+
+  .filter-section {
+    padding: 1rem;
+  }
+
+  .filter-bar input,
+  .filter-bar select,
+  .filter-bar button {
+    width: 100%;
+    max-width: 300px;
+  }
+}
