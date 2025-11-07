@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile | Dice Spot</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/png" href="img/icon.png">
+  <script defer src="navbar.js"></script>
+  <script defer src="profile.js"></script>
+</head>
+<body>
+  <nav>
+    <h1>🎲 Dice Spot</h1>
+    <div id="nav-links"></div>
+  </nav>
+
+  <main id="profile-section">
+    <div class="profile-card">
+      <h2>My Profile</h2>
+      <p id="welcome"></p>
+
+      <form id="profile-form">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" disabled>
+        </div>
+
+        <div class="form-group">
+          <label for="password">New Password</label>
+          <input type="password" id="password" placeholder="Enter new password">
+        </div>
+
+        <button type="submit">Update Profile</button>
+      </form>
+
+      <p id="status-msg"></p>
+    </div>
+  </main>
+
+  <footer>
+    <p class="footer-bottom">© 2025 Dice Spot — Built by adventurers, for adventurers ⚔️</p>
+  </footer>
+</body>
+</html>

@@ -73,10 +73,10 @@ function updateCart() {
     });
   });
 
-  const checkoutBtn = document.getElementById("checkout");
-  if (checkoutBtn) {
-    checkoutBtn.addEventListener("click", () => {
-      alert("Checkout coming soon 💳");
-    });
-  }
+const checkoutBtn = document.getElementById("checkout");
+if (checkoutBtn) {
+  checkoutBtn.addEventListener("click", () => {
+    window.location.href = "checkout.html";
+  });
+}
 }

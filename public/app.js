@@ -2,23 +2,46 @@ document.addEventListener("DOMContentLoaded", async () => {
   updateCartCount();
 
   const productsContainer = document.getElementById("products");
+  const searchInput = document.getElementById("search-input");
+  const categoryFilter = document.getElementById("category-filter");
 
+  let products = [];
+
+  // 🔹 Chargement initial des produits depuis le backend
   try {
     const res = await fetch("/api/products");
-    const products = await res.json();
+    products = await res.json();
+    displayProducts(products);
+  } catch (err) {
+    console.error("Erreur chargement produits :", err);
+    productsContainer.innerHTML = "<p>⚠️ Impossible de charger les produits.</p>";
+  }
 
-    productsContainer.innerHTML = products.map((p, i) => `
+  // 🔹 Fonction d'affichage
+  function displayProducts(list) {
+    if (list.length === 0) {
+      productsContainer.innerHTML = "<p>No products found 🧐</p>";
+      return;
+    }
+
+    productsContainer.innerHTML = list.map((p, i) => `
       <div class="product" style="animation-delay:${i * 0.1}s">
         <img src="${p.image || 'https://via.placeholder.com/250'}" alt="${p.name}">
         <h3>${p.name}</h3>
         <p>${p.description}</p>
         <strong>${p.price} €</strong>
+        <em class="category-tag">${p.category || 'Uncategorized'}</em>
         <button class="add-btn" data-id="${p.id}" data-name="${p.name}" data-price="${p.price}">
           Add to cart
         </button>
       </div>
     `).join("");
 
+    attachCartButtons();
+  }
+
+  // 🔹 Ajout au panier
+  function attachCartButtons() {
     document.querySelectorAll(".add-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         const id = btn.dataset.id;
@@ -27,11 +50,32 @@ document.addEventListener("DOMContentLoaded", async () => {
         addToCart(id, name, price);
       });
     });
-  } catch {
-    productsContainer.innerHTML = "<p>⚠️ Impossible de charger les produits.</p>";
+  }
+
+  // 🔍 Filtrage texte et catégorie
+  if (searchInput && categoryFilter) {
+    searchInput.addEventListener("input", applyFilters);
+    categoryFilter.addEventListener("change", applyFilters);
+  }
+
+  function applyFilters() {
+    const search = searchInput.value.toLowerCase();
+    const category = categoryFilter.value;
+
+    const filtered = products.filter(p => {
+      const matchSearch =
+        p.name.toLowerCase().includes(search) ||
+        p.description.toLowerCase().includes(search);
+      const matchCategory =
+        category === "all" || (p.category && p.category.toLowerCase() === category);
+      return matchSearch && matchCategory;
+    });
+
+    displayProducts(filtered);
   }
 });
 
+// === PANIER ===
 function updateCartCount() {
   try {
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -57,6 +101,7 @@ function addToCart(id, name, price) {
   showNotification(`${name} added to cart!`);
 }
 
+// === NOTIF ===
 function showNotification(msg) {
   const notif = document.createElement("div");
   notif.textContent = msg;

@@ -1,35 +1,42 @@
 document.addEventListener("DOMContentLoaded", () => {
   const nav = document.getElementById("nav-links");
-  const user = localStorage.getItem("user");
-  const role = localStorage.getItem("role");
+  const storedUser = JSON.parse(localStorage.getItem("loggedInUser"));
+  const cart = JSON.parse(localStorage.getItem("cart")) || [];
+  const cartCount = cart.length;
 
-  if (!user) {
-    // Non connecté
+  
+  if (!storedUser) {
     nav.innerHTML = `
       <a href="index.html">Shop</a>
-      <a href="cart.html">🛒 Cart</a>
+      <a href="cart.html" id="cart-link">🛒 Cart (${cartCount})</a>
       <a href="login.html">Login</a>
     `;
   } else {
-    // Connecté
+    const { username, role } = storedUser;
+
     nav.innerHTML = `
       <a href="index.html">Shop</a>
-      <a href="cart.html">🛒 Cart</a>
+      <a href="cart.html" id="cart-link">🛒 Cart (${cartCount})</a>
       ${role === "admin" ? '<a href="admin.html">⚙️ Admin</a>' : ""}
-      <a href="#" id="logout">Logout (${user})</a>
+      <a href="profile.html" id="profile-link">👤 Welcome, <strong>${username}</strong></a>
+      <a href="#" id="logout">Logout</a>
     `;
 
+    
     document.getElementById("logout").addEventListener("click", () => {
-      localStorage.removeItem("user");
-      localStorage.removeItem("role");
+      localStorage.removeItem("loggedInUser");
+      alert("👋 Logged out successfully!");
       location.href = "index.html";
     });
   }
 });
-document.addEventListener('wheel', function (e) {
+
+
+
+document.addEventListener("wheel", e => {
   if (e.ctrlKey) e.preventDefault();
 }, { passive: false });
 
-document.addEventListener('keydown', function (e) {
+document.addEventListener("keydown", e => {
   if (e.ctrlKey && (e.key === '+' || e.key === '-' || e.key === '=')) e.preventDefault();
 });
