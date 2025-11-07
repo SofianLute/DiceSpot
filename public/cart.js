@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
-  updateCartCount();
-  updateCart();
+  updateCartCount(); // show cart item count
+  updateCart(); // show cart content
 });
 
 function updateCartCount() {
@@ -9,7 +9,7 @@ function updateCartCount() {
     const cartLink = document.querySelector("#cart-link");
     if (cartLink) cartLink.textContent = `🛒 Cart (${cart.length})`;
   } catch (err) {
-    console.error("Erreur updateCartCount:", err);
+    console.error("Error updateCartCount:", err);
   }
 }
 
@@ -18,6 +18,7 @@ function updateCart() {
   const container = document.getElementById("cart-container");
   const summary = document.getElementById("cart-summary");
 
+  // if cart empty
   if (cart.length === 0) {
     container.innerHTML = "<p>Your cart is empty 🛍️</p>";
     summary.innerHTML = "";
@@ -26,6 +27,7 @@ function updateCart() {
   }
 
   let subtotal = 0;
+  // display each product in cart
   container.innerHTML = cart.map((item, i) => {
     const price = parseFloat(item.price) || 0;
     const qty = item.quantity || 1;
@@ -42,9 +44,11 @@ function updateCart() {
     `;
   }).join("");
 
+  // calculate total + tax
   const tax = subtotal * 0.2;
   const total = subtotal + tax;
 
+  // show order summary
   summary.innerHTML = `
     <h3>Order Summary</h3>
     <p>Subtotal: <strong>${subtotal.toFixed(2)} €</strong></p>
@@ -53,6 +57,7 @@ function updateCart() {
     <button id="checkout">Proceed to Payment 💳</button>
   `;
 
+  // update quantity when input changes
   document.querySelectorAll(".qty-input").forEach(input => {
     input.addEventListener("change", e => {
       const i = e.target.dataset.index;
@@ -63,6 +68,7 @@ function updateCart() {
     });
   });
 
+  // remove product from cart
   document.querySelectorAll(".remove-btn").forEach(btn => {
     btn.addEventListener("click", e => {
       const i = e.target.dataset.index;
@@ -73,10 +79,11 @@ function updateCart() {
     });
   });
 
-const checkoutBtn = document.getElementById("checkout");
-if (checkoutBtn) {
-  checkoutBtn.addEventListener("click", () => {
-    window.location.href = "checkout.html";
-  });
-}
+  // go to checkout page
+  const checkoutBtn = document.getElementById("checkout");
+  if (checkoutBtn) {
+    checkoutBtn.addEventListener("click", () => {
+      window.location.href = "checkout.html";
+    });
+  }
 }

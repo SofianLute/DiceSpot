@@ -6,11 +6,11 @@ import userRoutes from "./routes/users.js";
 import checkoutRoutes from "./routes/checkout.js"; 
 
 const app = express();
-app.use(cors());
-app.use(express.json());
-app.use(express.static("public"));
+app.use(cors()); // allow cross-origin requests
+app.use(express.json()); // parse JSON from requests
+app.use(express.static("public")); // serve static files from /public
 
-
+// create products table if not exists
 async function ensureProductTable() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS products (
@@ -24,6 +24,7 @@ async function ensureProductTable() {
   console.log("✅ Table 'products' ready");
 }
 
+// create users table if not exists
 async function ensureUserTable() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS users (
@@ -39,15 +40,16 @@ async function ensureUserTable() {
 await ensureProductTable();
 await ensureUserTable();
 
-
+// connect routes
 app.use("/api/products", productRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/checkout", checkoutRoutes); 
 
-
+// simple home route
 app.get("/", (req, res) => {
   res.send("<h1>✅ Dice Spot backend is running</h1>");
 });
 
+// start server
 const PORT = 3000;
 app.listen(PORT, () => console.log(`🚀 Dice Spot running on http://localhost:${PORT}`));

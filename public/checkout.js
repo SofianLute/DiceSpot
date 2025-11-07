@@ -2,8 +2,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("payment-form");
   const status = document.getElementById("status");
 
+  // when user submits payment form
   form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // stop normal form reload
 
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
     if (cart.length === 0) {
@@ -12,11 +13,11 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-   
+    // get customer info
     const name = document.getElementById("name").value.trim();
     const email = document.getElementById("email").value.trim();
 
-    
+    // build list of products to send
     const items = cart.map((it) => ({
       id: parseInt(it.id, 10),
       qty: parseInt(it.quantity || 1, 10),
@@ -26,6 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
     status.style.color = "#5c4dff";
 
     try {
+      // send data to backend
       const res = await fetch("/api/checkout/create-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -34,13 +36,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const data = await res.json();
 
+      // handle backend errors
       if (!res.ok || !data.success) {
         status.textContent = data.message || "❌ Unable to create payment session";
         status.style.color = "red";
         return;
       }
 
-      
+      // redirect to mock payment page
       window.location.href = data.redirectUrl;
     } catch (err) {
       console.error("Checkout error:", err);

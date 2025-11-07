@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const cart = JSON.parse(localStorage.getItem("cart")) || [];
   const cartCount = cart.length;
 
-  
+  // if user not logged in
   if (!storedUser) {
     nav.innerHTML = `
       <a href="index.html">Shop</a>
@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
   } else {
     const { username, role } = storedUser;
 
+    // if logged in, show username and logout
     nav.innerHTML = `
       <a href="index.html">Shop</a>
       <a href="cart.html" id="cart-link">🛒 Cart (${cartCount})</a>
@@ -22,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <a href="#" id="logout">Logout</a>
     `;
 
-    
+    // logout button
     document.getElementById("logout").addEventListener("click", () => {
       localStorage.removeItem("loggedInUser");
       alert("👋 Logged out successfully!");
@@ -31,12 +32,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-
-
+// prevent zoom with ctrl + scroll
 document.addEventListener("wheel", e => {
   if (e.ctrlKey) e.preventDefault();
 }, { passive: false });
 
+// prevent zoom with ctrl + or ctrl -
 document.addEventListener("keydown", e => {
   if (e.ctrlKey && (e.key === '+' || e.key === '-' || e.key === '=')) e.preventDefault();
 });

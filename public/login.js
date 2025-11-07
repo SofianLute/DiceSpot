@@ -1,15 +1,17 @@
 document.addEventListener("DOMContentLoaded", () => {
-  updateCartCount();
+  updateCartCount(); // show how many items in the cart
 
   const loginForm = document.getElementById("login-form");
   const msg = document.getElementById("msg");
 
+  // when user submits login form
   loginForm.addEventListener("submit", async e => {
-    e.preventDefault();
+    e.preventDefault(); // stop page reload
 
     const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value.trim();
 
+    // check if both fields are filled
     if (!username || !password) {
       msg.textContent = "⚠️ Please enter both username and password";
       msg.style.color = "orange";
@@ -17,6 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
+      // send login request to backend
       const res = await fetch("/api/users/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -26,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await res.json();
 
       if (res.ok && data.success) {
-        // Sauvegarde des infos du user
+        // save user info in localStorage
         localStorage.setItem("loggedInUser", JSON.stringify({
           username: data.user.username,
           role: data.user.role
@@ -35,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
         msg.textContent = "✅ Login successful!";
         msg.style.color = "green";
 
-        // Redirection selon le rôle
+        // redirect based on role
         setTimeout(() => {
           window.location.href = data.user.role === "admin" ? "admin.html" : "index.html";
         }, 800);
@@ -52,6 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+// update cart icon with number of items
 function updateCartCount() {
   const cart = JSON.parse(localStorage.getItem("cart")) || [];
   const cartLink = document.querySelector("#cart-link");

@@ -4,8 +4,9 @@ import crypto from "crypto";
 
 const router = express.Router();
 
-// --- Créer les tables si besoin ---
+// create tables if they don't exist
 async function ensureCheckoutTables() {
+  // table for orders
   await pool.query(`
     CREATE TABLE IF NOT EXISTS orders (
       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -21,6 +22,7 @@ async function ensureCheckoutTables() {
     )
   `);
 
+  // table for items in each order
   await pool.query(`
     CREATE TABLE IF NOT EXISTS order_items (
       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -33,6 +35,7 @@ async function ensureCheckoutTables() {
     )
   `);
 
+  // table for payments
   await pool.query(`
     CREATE TABLE IF NOT EXISTS payments (
       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -49,35 +52,36 @@ async function ensureCheckoutTables() {
 }
 ensureCheckoutTables();
 
-// --- Utilitaires taxes + shipping ---
+// simple tax and shipping functions
 const VAT_RATE = 0.20;
 function calcTax(subtotal) { return +(subtotal * VAT_RATE).toFixed(2); }
 function calcShipping(subtotal) {
-  // Ex: livraison offerte à partir de 60€
+  // free shipping if total >= 60
   return subtotal >= 60 ? 0 : 4.99;
 }
 
-// --- Crée une session de paiement ---
+// create payment session
 router.post("/create-session", async (req, res) => {
   try {
-    const { items = [], customer = {} } = req.body; // items: [{id, qty}], customer:{name,email}
+    const { items = [], customer = {} } = req.body; // get cart + user info
     if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ success: false, message: "Empty cart" });
     }
 
-    // Récupère les produits en base pour éviter fraude côté client
+    // check valid ids
     const ids = items.map(it => parseInt(it.id, 10)).filter(Number.isInteger);
     if (ids.length === 0) return res.status(400).json({ success: false, message: "Invalid items" });
 
+    // get product info from database
     const [rows] = await pool.query(
       `SELECT id, name, price FROM products WHERE id IN (${ids.map(()=>"?").join(",")})`,
       ids
     );
 
-    // Map quantité
+    // map quantity by product id
     const qtyById = new Map(items.map(it => [parseInt(it.id,10), Math.max(1, parseInt(it.qty||1,10))]));
 
-    // Calcule le subtotal à partir des prix serveur
+    // calculate subtotal
     let subtotal = 0;
     rows.forEach(p => {
       const q = qtyById.get(p.id) || 1;
@@ -88,14 +92,14 @@ router.post("/create-session", async (req, res) => {
     const shipping = calcShipping(subtotal);
     const total = +(subtotal + tax + shipping).toFixed(2);
 
-    // Crée la commande
+    // insert order
     const [orderRes] = await pool.query(
       "INSERT INTO orders (customer_name, customer_email, subtotal, tax, shipping, total, status) VALUES (?,?,?,?,?,?, 'pending')",
       [customer.name || null, customer.email || null, subtotal, tax, shipping, total]
     );
     const orderId = orderRes.insertId;
 
-    // Ajoute les items
+    // insert all items
     const values = rows.map(p => {
       const q = qtyById.get(p.id) || 1;
       return [orderId, p.id, p.name, p.price, q];
@@ -107,14 +111,14 @@ router.post("/create-session", async (req, res) => {
       );
     }
 
-    // Crée la session de paiement (token)
+    // create random payment session token
     const sessionToken = crypto.randomBytes(16).toString("hex");
     await pool.query(
       "INSERT INTO payments (order_id, session_token, amount, status) VALUES (?,?,?, 'created')",
       [orderId, sessionToken, total]
     );
 
-    // URL de la passerelle factice
+    // redirect to mock payment page
     const redirectUrl = `/mock-pay.html?session=${sessionToken}`;
     res.json({ success: true, redirectUrl });
   } catch (err) {
@@ -123,7 +127,7 @@ router.post("/create-session", async (req, res) => {
   }
 });
 
-// --- Récupère l'état de la session pour l'écran de paiement ---
+// get payment session info
 router.get("/session/:token", async (req, res) => {
   try {
     const token = req.params.token;
@@ -144,22 +148,26 @@ router.get("/session/:token", async (req, res) => {
   }
 });
 
-// --- “Paiement” simulé ---
+// fake pay endpoint
 router.post("/pay", async (req, res) => {
   try {
     const { session, cardLast4 } = req.body;
     if (!session) return res.status(400).json({ success: false, message: "Missing session" });
 
+    // find session
     const [rows] = await pool.query(
       `SELECT p.id, p.order_id, p.status FROM payments p WHERE p.session_token=?`,
       [session]
     );
     if (rows.length === 0) return res.status(404).json({ success: false, message: "Session not found" });
     const payment = rows[0];
+
+    // check if already paid
     if (payment.status !== "created") {
       return res.status(400).json({ success: false, message: "Payment already processed" });
     }
 
+    // mark as paid
     await pool.query("UPDATE payments SET status='paid', card_last4=? WHERE id=?", [cardLast4 || null, payment.id]);
     await pool.query("UPDATE orders SET status='paid' WHERE id=?", [payment.order_id]);
 
@@ -170,13 +178,14 @@ router.post("/pay", async (req, res) => {
   }
 });
 
-// --- Annuler la session ---
+// cancel payment session
 router.post("/cancel", async (req, res) => {
   try {
     const { session } = req.body;
     const [rows] = await pool.query("SELECT id, order_id FROM payments WHERE session_token=?", [session]);
     if (rows.length === 0) return res.status(404).json({ success: false, message: "Session not found" });
 
+    // mark as canceled
     await pool.query("UPDATE payments SET status='canceled' WHERE id=?", [rows[0].id]);
     await pool.query("UPDATE orders SET status='canceled' WHERE id=?", [rows[0].order_id]);
 

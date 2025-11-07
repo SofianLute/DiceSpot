@@ -5,18 +5,23 @@ document.addEventListener("DOMContentLoaded", () => {
   const usernameInput = document.getElementById("username");
   const statusMsg = document.getElementById("status-msg");
 
+  // if no user logged in, go back to login page
   if (!user) {
     location.href = "login.html";
     return;
   }
 
+  // show username on page
   welcome.textContent = `👋 Welcome, ${user.username}!`;
   usernameInput.value = user.username;
 
+  // when user submits password update
   form.addEventListener("submit", async e => {
     e.preventDefault();
+
     const newPassword = document.getElementById("password").value.trim();
 
+    // check input
     if (!newPassword) {
       statusMsg.textContent = "⚠️ Please enter a new password.";
       statusMsg.style.color = "orange";
@@ -24,6 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
+      // send request to backend
       const res = await fetch("/api/users/update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -32,6 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const data = await res.json();
 
+      // handle success or error message
       if (data.success) {
         statusMsg.textContent = "✅ Profile updated successfully!";
         statusMsg.style.color = "green";

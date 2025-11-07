@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", async () => {
-  updateCartCount();
+  updateCartCount(); // show number of items in cart
 
   const productsContainer = document.getElementById("products");
   const searchInput = document.getElementById("search-input");
@@ -7,17 +7,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   let products = [];
 
-  // 🔹 Chargement initial des produits depuis le backend
+  // load products from backend
   try {
     const res = await fetch("/api/products");
     products = await res.json();
     displayProducts(products);
   } catch (err) {
-    console.error("Erreur chargement produits :", err);
-    productsContainer.innerHTML = "<p>⚠️ Impossible de charger les produits.</p>";
+    console.error("Error loading products:", err);
+    productsContainer.innerHTML = "<p>⚠️ Can't load products.</p>";
   }
 
-  // 🔹 Fonction d'affichage
+  // show products on page
   function displayProducts(list) {
     if (list.length === 0) {
       productsContainer.innerHTML = "<p>No products found 🧐</p>";
@@ -37,10 +37,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       </div>
     `).join("");
 
-    attachCartButtons();
+    attachCartButtons(); // add event listeners
   }
 
-  // 🔹 Ajout au panier
+  // handle add to cart button
   function attachCartButtons() {
     document.querySelectorAll(".add-btn").forEach(btn => {
       btn.addEventListener("click", () => {
@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // 🔍 Filtrage texte et catégorie
+  // handle search + category filter
   if (searchInput && categoryFilter) {
     searchInput.addEventListener("input", applyFilters);
     categoryFilter.addEventListener("change", applyFilters);
@@ -62,6 +62,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const search = searchInput.value.toLowerCase();
     const category = categoryFilter.value;
 
+    // filter by search text and category
     const filtered = products.filter(p => {
       const matchSearch =
         p.name.toLowerCase().includes(search) ||
@@ -75,20 +76,21 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-// === PANIER ===
+// === CART ===
 function updateCartCount() {
   try {
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
     const cartLink = document.querySelector("#cart-link");
     if (cartLink) cartLink.textContent = `🛒 Cart (${cart.length})`;
   } catch (err) {
-    console.error("Erreur updateCartCount:", err);
+    console.error("Error updateCartCount:", err);
   }
 }
 
 function addToCart(id, name, price) {
   const cart = JSON.parse(localStorage.getItem("cart")) || [];
 
+  // if product already in cart, increase quantity
   const existing = cart.find(item => item.id === id);
   if (existing) {
     existing.quantity = (existing.quantity || 1) + 1;
@@ -101,7 +103,7 @@ function addToCart(id, name, price) {
   showNotification(`${name} added to cart!`);
 }
 
-// === NOTIF ===
+// === NOTIFICATION ===
 function showNotification(msg) {
   const notif = document.createElement("div");
   notif.textContent = msg;
